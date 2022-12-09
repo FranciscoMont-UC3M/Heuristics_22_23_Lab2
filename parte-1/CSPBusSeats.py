@@ -4,6 +4,7 @@ import constraint
 from constraint import *
 import copy
 import os
+import time
 
 '''Run cd parte-1 before running this python script'''
 
@@ -26,7 +27,6 @@ array_bus = ["blue", "blue", "blue", "blue",
              "white", "white", "white", "white",
              "white", "white", "white", "white",
              "white", "white", "white", "white"]
-
 
 # The array of students stores all students as read from the file, in order.
 # Student with id number 1 will be in position 0, and so on, id number i will be in position i-1 of the array.
@@ -73,42 +73,88 @@ for i in range(len(matrix_students)):
         problem.addVariable(matrix_students[i][0], domainBlue)
 
 
-'''Constraint checks that the seats assigned from domain are a single seat and not assigned repeatedly'''
+'''Constraint checks that the seats assigned from domain are a single seat not assigned repeatedly - WORKS'''
+# The solver algorithm already gives a single value to each variable,
+# shows multiple possible values as different solutions
 def uniqueSingleSeat(*args):
     for i in range(len(args)):
         for j in range(i+1, len(args)):
             if i != j and args[i] == args[j]:  # if different variables with same domain (sharing seat), not valid
                 return False
-        if len(args[i] != 1):  # if using none/several seats, not valid
-            return False
     return True
-
 problem.addConstraint(uniqueSingleSeat, arrayVariables)
+# Alternatively, can use allDifferentConstraints function, identical role
 
-'''Constraint for restricted mobility is valid only if the seat assigned is blue and adjacent one is also free'''
-def ifRestrictedThenSeatIsFreeBlue(*args):
+'''Constraint for restricted, is valid only if the seat adjacent to the free blue one assigned is also free - WORKS'''
+# An IMPORTANT computational improvement would be to always seat them on the windows (seats 1+4k or 0+4k),
+# since it will always be the best position for them taking into account constraints for troublesome students,
+# but since it isn't a requirement, we will keep the more elemental version of the constraint for restricted students.
+def ifRestrictedThenAdjacentSeatIsFree(*args):
     for i in range(len(args)):
-        #If i is restricted student, then compare to all other ones (i!=j) and see if anyone is in adjacent blue
-        for j in range(len(args)):
-            if i != j and args[i] == args[j]:  # if different variables with same domain (sharing seat), not valid
-                return False
-        if len(args[i] != 1):  # if using none/several seats, not valid
-            return False
-    return False
+        #If i is restricted student, then find if anyone is in adjacent blue (False=invalid)
+        if matrix_students[i][3]=="R":
+            valueRestricted = args[i]
+            # print("current valueRestricted is "+str(valueRestricted))
+            for j in range(i+1, len(args)):
+                if valueRestricted % 2 == 0 and args[j] == valueRestricted - 1:
+                    return False
+                if valueRestricted % 2 == 1 and args[j] == valueRestricted + 1:
+                    return False
+            return True  # if no one is adjacent
+        return True  # if no restricted then this constraint is satisified
+    return False  # insufficient number of variables
+problem.addConstraint(ifRestrictedThenAdjacentSeatIsFree, arrayVariables)
 
-def seatIsFreeBlue(a):
-    if array_bus[a-1] == "blue":
-        if a % 2 == 0 and seatIsUsed(a-1):
-            return True
-    return False
+'''Constraint for troublesome, is valid only if the seats around aren't used by troublesome or restricted, except 
+    except if they are siblings - CHECK'''
 
-def seatIsUsed(b):
-    for j in range(len(arrayVariables)):
-        if matrix_students[j] == b:
-            return True
+def ifTroublesomeNoCR_ExceptSibling(*args):
+    for i in range(len(args)):
+        # If i is troublesome student, then find if anyone is adjacent troublesome/restricted who aren't brothers
+        if matrix_students[i][2] == "C":
+            valueTrouble=args[i]
+            sibling=int(matrix_students[i][4])
+            for j in range(i+1, len(args)):
+                # j+1 is the studentid (args[0] is student 1)
+                # If j+1 is the sibling, or they are not troublesome/restricted, they can seat without distance
+                # For any other case, we need to check if student j is seated around i.
+                # if j+1 == sibling:
+                #    print("true sibling in position "+str(j))
+                if j+1 != sibling and (matrix_students[j][2] == "C" or matrix_students[j][3] == "R"):
+                    # print("if j+1 "+str(j+1)+" is equal to sibling "+str(sibling)+" this should not run")
+                    valueOther=args[j]
+                    # -4 and +4 checked in every case, if j is in their position, then constraint not satisfied
+                    if valueTrouble-4 == valueOther or valueTrouble+4 == valueOther:
+                        return False
+
+                    # if i is sitting in the 1st row (left window), we need to check positions -4,-3,+1,+4,+5
+                    elif valueTrouble % 4 == 1:
+                        if valueTrouble-3 == valueOther or valueTrouble+1 == valueOther or valueTrouble+5 == valueOther:
+                            return False
+                    # if i is sitting in the 2nd or 3rd row (corridor), we need to check -5,-4,-3,-1,+1,+3,+4,+5
+                    elif valueTrouble % 4 == 2 or valueTrouble % 4 == 3:
+                        if valueTrouble-5 == valueOther or valueTrouble-3 == valueOther or \
+                                valueTrouble-1 == valueOther or valueTrouble+1 == valueOther or \
+                                valueTrouble+3 == valueOther or valueTrouble+5 == valueOther:
+                            return False
+                    # if i is sitting in the 4th row (right window), we need to check positions -5,-4,-1,+3,+4
+                    elif valueTrouble % 4 == 0:
+                        if valueTrouble-5 == valueOther or valueTrouble-1 == valueOther or valueTrouble+3 == valueOther:
+                            return False
+                    return True  # If j not around i, then constraint satisfied
+                return True  # If j is sibling or it's not Troublesome/Restricted
+        return True  # If the student is not Troublesome, then constraint doesn't apply/satisfied
     return False
+problem.addConstraint(ifTroublesomeNoCR_ExceptSibling, arrayVariables)
+
 
 '''
 if 3 in domainBlue:
     print("3 in domainBlue")
 '''
+
+time_start = time.time()
+print(problem.getSolutions())
+print(len(problem.getSolutions()))
+time_end = time.time()
+print(time_end-time_start)
