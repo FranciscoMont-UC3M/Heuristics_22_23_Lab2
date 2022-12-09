@@ -1,2 +1,3 @@
 #!/bin/bash
-python3 CSPBusSeats.py students01
+# Copy and paste to execute after doing a "cd parte-1" to access to folder appropriately
+python parte1/CSPBusSeats.py students01
