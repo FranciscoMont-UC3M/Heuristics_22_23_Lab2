@@ -164,7 +164,7 @@ print("back of the bus: " + str(arrayBackBus))
 # If they had to be on a seat on the FRONT of the bus (bus seat number under 17) and some seat is over 16, return False
 # If they had to be on a seat on the BACK of the bus (bus seat number over 16) and some seat is under 17, return False
 
-
+'''Constraint for siblings, valid only if they sit together - TEST'''
 def seatAccordingToYear_ExceptSibling(*args):
     for i in range(len(args)):
         # if the students are of first year they must sit on the front of the bus (seats 1-16), else failed constraint
@@ -182,7 +182,7 @@ def seatAccordingToYear_ExceptSibling(*args):
     return True
 problem.addConstraint(seatAccordingToYear_ExceptSibling, arrayVariables)
 
-'''Constraint for siblings, valid only if they sit together - TEST'''
+
 
 '''
 if 3 in domainBlue:
