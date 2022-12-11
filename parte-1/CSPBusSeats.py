@@ -105,9 +105,7 @@ def ifRestrictedThenAdjacentSeatIsFree(*args):
     return False  # insufficient number of variables
 problem.addConstraint(ifRestrictedThenAdjacentSeatIsFree, arrayVariables)
 
-'''Constraint for troublesome, is valid only if the seats around aren't used by troublesome or restricted, except 
-    except if they are siblings - CHECK'''
-
+'''Constraint for troublesome, valid only if seats around not used by troublesome/restricted, except if their sibling - WORKS'''
 def ifTroublesomeNoCR_ExceptSibling(*args):
     for i in range(len(args)):
         # If i is troublesome student, then find if anyone is adjacent troublesome/restricted who aren't brothers
@@ -147,6 +145,44 @@ def ifTroublesomeNoCR_ExceptSibling(*args):
     return False
 problem.addConstraint(ifTroublesomeNoCR_ExceptSibling, arrayVariables)
 
+'''Constraint for year, valid only if 1st year in seats 1-16, and if 2nd year in 17-32 except if 1st year sibling - TEST'''
+arrayFrontBus = []  # For those who will have the constraint of sitting in seats 1-16
+arrayBackBus = []  # For those who will have the constraint of sitting in seats 17-32
+for i in range(len(arrayVariables)):
+    # if the students are of first year they always sit on the front of the bus
+    if matrix_students[i][1] == "1":
+        arrayFrontBus.append(arrayVariables[i])
+    # If they have a sibling in 1st year, they seat in the front of the bus with them, else they seat in the back
+    elif matrix_students[i][1] == "2":
+        sibling = int(matrix_students[i][4])
+        if sibling != 0 and matrix_students[sibling-1][1] == "1":
+            arrayFrontBus.append(arrayVariables[i])
+        else:
+            arrayBackBus.append(arrayVariables[i])
+print("front of the bus: " + str(arrayFrontBus))
+print("back of the bus: " + str(arrayBackBus))
+# If they had to be on a seat on the FRONT of the bus (bus seat number under 17) and some seat is over 16, return False
+# If they had to be on a seat on the BACK of the bus (bus seat number over 16) and some seat is under 17, return False
+
+
+def seatAccordingToYear_ExceptSibling(*args):
+    for i in range(len(args)):
+        # if the students are of first year they must sit on the front of the bus (seats 1-16), else failed constraint
+        if matrix_students[i][1] == "1" and args[i]>16:
+            return False
+        # If they have a sibling in 1st year they must sit in the front of the bus with them (seats 1-16), else failed
+        # If they don0t constraintelse they seat in the back
+        elif matrix_students[i][1] == "2":
+            sibling = int(matrix_students[i][4])
+            if sibling != 0 and matrix_students[sibling - 1][1] == "1":
+                if args[i]>16:
+                    return False
+            elif args[i]<17:
+                return False
+    return True
+problem.addConstraint(seatAccordingToYear_ExceptSibling, arrayVariables)
+
+'''Constraint for siblings, valid only if they sit together - TEST'''
 
 '''
 if 3 in domainBlue:
