@@ -224,6 +224,6 @@ if 3 in domainBlue:
 
 time_start = time.time()
 print(problem.getSolutions())
-print(len(problem.getSolutions()))
+print("#solutions:<"+str(len(problem.getSolutions()))+">")
 time_end = time.time()
 print(time_end-time_start)
