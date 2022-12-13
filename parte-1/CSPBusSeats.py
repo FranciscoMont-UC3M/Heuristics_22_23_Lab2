@@ -35,7 +35,7 @@ array_bus = ["blue", "blue", "blue", "blue",
     For the sake of simplicity we assume the data is provided ordered and i-1 position is element with id i, but
     we could have made such version too, at higher computational time'''
 
-array_students=[]
+array_students = []
 with open("CSP-tests/" + students_path + ".txt") as textFile:
     for line in textFile:
         array_students.append(line.strip())
@@ -100,9 +100,7 @@ def ifRestrictedThenAdjacentSeatIsFree(*args):
                     return False
                 if valueRestricted % 2 == 1 and args[j] == valueRestricted + 1:
                     return False
-            return True  # if no one is adjacent
-        return True  # if no restricted then this constraint is satisified
-    return False  # insufficient number of variables
+    return True  # if no restricted fails, there are no restricted, or no variables, then constraint satisfied
 problem.addConstraint(ifRestrictedThenAdjacentSeatIsFree, arrayVariables)
 
 '''Constraint for troublesome, valid only if seats around not used by troublesome/restricted, except if their sibling - WORKS'''
@@ -139,10 +137,10 @@ def ifTroublesomeNoCR_ExceptSibling(*args):
                     elif valueTrouble % 4 == 0:
                         if valueTrouble-5 == valueOther or valueTrouble-1 == valueOther or valueTrouble+3 == valueOther:
                             return False
-                    return True  # If j not around i, then constraint satisfied
-                return True  # If j is sibling or it's not Troublesome/Restricted
-        return True  # If the student is not Troublesome, then constraint doesn't apply/satisfied
-    return False
+                    #return True  # If j not around i, then constraint satisfied
+                #return True  # If j is sibling or it's not Troublesome/Restricted
+        #return True  # If the student is not Troublesome, then constraint doesn't apply/satisfied
+    return True
 problem.addConstraint(ifTroublesomeNoCR_ExceptSibling, arrayVariables)
 
 '''Constraint for year, valid only if 1st year in seats 1-16, and if 2nd year in 17-32 except if 1st year sibling - TEST'''
@@ -159,10 +157,10 @@ for i in range(len(arrayVariables)):
             arrayFrontBus.append(arrayVariables[i])
         else:
             arrayBackBus.append(arrayVariables[i])
+    # If they had to be on a seat on the FRONT of the bus (bus seat number under 17) and some seat is over 16, return False
+    # If they had to be on a seat on the BACK of the bus (bus seat number over 16) and some seat is under 17, return False
 print("front of the bus: " + str(arrayFrontBus))
 print("back of the bus: " + str(arrayBackBus))
-# If they had to be on a seat on the FRONT of the bus (bus seat number under 17) and some seat is over 16, return False
-# If they had to be on a seat on the BACK of the bus (bus seat number over 16) and some seat is under 17, return False
 
 '''Constraint for siblings, valid only if they sit together - TEST'''
 def seatAccordingToYear_ExceptSibling(*args):
