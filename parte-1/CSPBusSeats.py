@@ -109,14 +109,14 @@ def ifTroublesomeNoCR_ExceptSibling(*args):
         # If i is troublesome student, then find if anyone is adjacent troublesome/restricted who aren't brothers
         if matrix_students[i][2] == "C":
             valueTrouble=args[i]
-            sibling=int(matrix_students[i][4])
+            sibling_of_i=matrix_students[i][4]
             for j in range(i+1, len(args)):
-                # j+1 is the studentid (args[0] is student 1)
-                # If j+1 is the sibling, or they are not troublesome/restricted, they can seat without distance
+                # matrix_students[j][0] is the student id of j
+                # If j is the sibling of i, or they are not troublesome/restricted, they can seat without distance
                 # For any other case, we need to check if student j is seated around i.
-                # if j+1 == sibling:
+                # if matrix_students[j][0] == sibling:
                 #    print("true sibling in position "+str(j))
-                if j+1 != sibling and (matrix_students[j][2] == "C" or matrix_students[j][3] == "R"):
+                if matrix_students[j][0] != sibling_of_i and (matrix_students[j][2] == "C" or matrix_students[j][3] == "R"):
                     # print("if j+1 "+str(j+1)+" is equal to sibling "+str(sibling)+" this should not run")
                     valueOther=args[j]
                     # -4 and +4 checked in every case, if j is in their position, then constraint not satisfied
@@ -143,7 +143,7 @@ def ifTroublesomeNoCR_ExceptSibling(*args):
     return True
 problem.addConstraint(ifTroublesomeNoCR_ExceptSibling, arrayVariables)
 
-'''Constraint for year, valid only if 1st year in seats 1-16, and if 2nd year in 17-32 except if 1st year sibling - TEST'''
+'''Constraint for year, valid only if 1st year in seats 1-16, and if 2nd year in 17-32 except if 1st year sibling - WORKS'''
 arrayFrontBus = []  # For those who will have the constraint of sitting in seats 1-16
 arrayBackBus = []  # For those who will have the constraint of sitting in seats 17-32
 for i in range(len(arrayVariables)):
@@ -162,14 +162,13 @@ for i in range(len(arrayVariables)):
 print("front of the bus: " + str(arrayFrontBus))
 print("back of the bus: " + str(arrayBackBus))
 
-'''Constraint for siblings, valid only if they sit together - TEST'''
+'''Constraint for siblings, valid only if they sit in same section - WORKS'''
 def seatAccordingToYear_ExceptSibling(*args):
     for i in range(len(args)):
         # if the students are of first year they must sit on the front of the bus (seats 1-16), else failed constraint
         if matrix_students[i][1] == "1" and args[i]>16:
             return False
-        # If they have a sibling in 1st year they must sit in the front of the bus with them (seats 1-16), else failed
-        # If they don0t constraintelse they seat in the back
+        # If they have a sibling in 1st year they must sit in the front of the bus with them (seats 1-16), else failed constraint
         elif matrix_students[i][1] == "2":
             sibling = int(matrix_students[i][4])
             if sibling != 0 and matrix_students[sibling - 1][1] == "1":
@@ -180,6 +179,43 @@ def seatAccordingToYear_ExceptSibling(*args):
     return True
 problem.addConstraint(seatAccordingToYear_ExceptSibling, arrayVariables)
 
+'''Constraint for siblings, valid only if they sit together with the older one outside - TEST'''
+def ifSiblingSeatTogether_ExceptRestricted(*args):
+    for i in range(len(args)):
+        # if the student has a sibling, neither is restricted and they're not sitting together then failed constraint
+        # (remember x-1 is array position of student with id x)
+        sibling_of_i = matrix_students[i][1]
+        position_sibling = int(matrix_students[i][1])-1
+        if sibling_of_i != "0" and matrix_students[i][3] != "R" and matrix_students[position_sibling][3] != "R":
+            # To know if they are sitting together, we store their positions, compare the difference and their values.
+            pos_i = args[i]
+            pos_j = args[position_sibling]
+            # If difference between pos_i and pos_j is other than one, they are too far to be seated together.
+            if abs(pos_i-pos_j) != 1:
+                return False
+            # If pos_i is in 4+4k and pos_j is larger by one (5+4k=1+5k), they are in different rows
+            elif pos_i < pos_j and pos_i % 4 == 0:
+                return False
+            # If pos_i is in 1+4k and pos_j is smaller by one (4+3k), they are in different rows
+            elif pos_i > pos_j and pos_i % 4 == 1:
+                return False
+
+            # To know if they are sitting together with older one outside, we find the older one (if there is any).
+            age_i = int(matrix_students[i][1])
+            age_j = int(matrix_students[position_sibling][1])
+            age_dif = abs(age_i - age_j)
+            older = max(age_i, age_j)
+            if age_dif == 1:
+                if age_i > age_j:
+                    # if age_i not in corridor, return False
+                    return False
+                if age_j > age_i:
+                    # if age_j not in corridor, return False
+                    return False
+            # TODO
+
+    return True
+problem.addConstraint(ifSiblingSeatTogether_ExceptRestricted, arrayVariables)
 
 
 '''
