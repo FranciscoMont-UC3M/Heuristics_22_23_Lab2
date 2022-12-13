@@ -224,6 +224,15 @@ if 3 in domainBlue:
 
 time_start = time.time()
 print(problem.getSolutions())
+
+solutions=problem.getSolutions()
+print("{")
+for index, solution in enumerate(solutions):
+    print("'"+str(matrix_students[0][0])+str(matrix_students[0][2])+str(matrix_students[0][3])+"':"+"{}".format(solution[matrix_students[i][0]]))
+    #print("'"+str(matrix_students[int(index)][0])+str(matrix_students[int(index)][2])+str(matrix_students[int(index)][3])+"':"+"{}".format(solution[matrix_students[i][0]]))
+    #print("{}".format(solution[matrix_students[i][0]]))
+print("}")
+
 print("#solutions:<"+str(len(problem.getSolutions()))+">")
 time_end = time.time()
 print(time_end-time_start)
