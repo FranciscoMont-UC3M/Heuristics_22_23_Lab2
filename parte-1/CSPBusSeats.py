@@ -207,12 +207,11 @@ def ifSiblingSeatTogether_ExceptRestricted(*args):
             older = max(age_i, age_j)
             if age_dif == 1:
                 if age_i > age_j:
-                    # if age_i not in corridor, return False
+                    # TODO if age_i not in corridor, return False
                     return False
                 if age_j > age_i:
-                    # if age_j not in corridor, return False
+                    # TODO if age_j not in corridor, return False
                     return False
-            # TODO
 
     return True
 problem.addConstraint(ifSiblingSeatTogether_ExceptRestricted, arrayVariables)
