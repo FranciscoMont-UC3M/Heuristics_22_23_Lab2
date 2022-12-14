@@ -205,32 +205,35 @@ def ifSiblingSeatTogether_ExceptRestricted(*args):
             age_i = int(matrix_students[i][1])
             age_j = int(matrix_students[position_sibling][1])
             age_dif = abs(age_i - age_j)
-            older = max(age_i, age_j)
             if age_dif == 1:
                 if age_i > age_j:  # When i older than j
-                    # If i (older) not in 2+4k and then not in 3+4k, its in 1+4k or 0+4k, which arent seats near aisle
-                    if pos_i % 4 != 2:
-                        if pos_i % 4 != 3:
-                            return False
+                    # If i (older) in 2+4k and brother not in 1+4k then False.
+                    if pos_i % 4 == 2 and pos_j % 4 != 1:
+                        return False
+                    # If i (older) in 3+4k and brother not in 0+4k then False.
+                    if pos_i % 4 == 3 and pos_j % 4 != 0:
+                        return False
                 if age_j > age_i:  # When j older than i
                     # If j (older) not in 2+4k and then not in 3+4k, its in 1+4k or 0+4k, which arent seats near aisle
-                    if pos_j % 4 != 2:
-                        if pos_j % 4 != 3:
+                    if pos_j % 4 != 2 and pos_j % 4 != 3:
+                        if pos_i % 4 == 2 or pos_i % 4 == 3:
                             return False
     return True
 problem.addConstraint(ifSiblingSeatTogether_ExceptRestricted, arrayVariables)
-
-
-'''
-if 3 in domainBlue:
-    print("3 in domainBlue")
-'''
 
 time_start = time.time()
 print(problem.getSolutions())
 
 solutions = problem.getSolutions()
 # print(problem.getSolutions()[1])
+print("Number of solutions:<"+str(len(solutions))+">")
+
+'''for index in range(len(solutions)):
+    string_solution = solutions[index]
+    for k, v in string_solution.items():
+        print('student=', k, ', value=', v)
+    print(string_solution)
+    #print("{}".format(solution[matrix_students[i][0]]))'''
 
 '''for index, solution in enumerate(solutions):
     # should be index in matrix_students[0], as matrix_students[index], else repeats the first students for all cases
@@ -239,14 +242,5 @@ solutions = problem.getSolutions()
     #print("{}".format(solution[matrix_students[i][0]]))
 print("}")'''
 
-for index in range(len(solutions)):
-    string_solution = solutions[index]
-    for k, v in string_solution.items():
-        print('student=', k, ', value=', v)
-    print(string_solution)
-    #print("{}".format(solution[matrix_students[i][0]]))
-
-
-print("#solutions:<"+str(len(solutions))+">")
 time_end = time.time()
 print(time_end-time_start)
