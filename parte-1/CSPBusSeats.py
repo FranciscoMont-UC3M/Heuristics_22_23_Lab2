@@ -185,8 +185,9 @@ def ifSiblingSeatTogether_ExceptRestricted(*args):
         # if the student has a sibling, neither is restricted and they're not sitting together then failed constraint
         # (remember x-1 is array position of student with id x)
         sibling_of_i = matrix_students[i][4]
-        position_sibling = int(matrix_students[i][1])-1
-        if sibling_of_i != "0" and matrix_students[i][3] != "R" and matrix_students[position_sibling][3] != "R": # If they are siblings and not reduced movility
+        position_sibling = int(sibling_of_i)-1
+        # If they are siblings and not reduced mobility
+        if sibling_of_i != "0" and matrix_students[i][3] != "R" and matrix_students[position_sibling][3] != "R":
             # To know if they are sitting together, we store their positions, compare the difference and their values.
             pos_i = args[i]
             pos_j = args[position_sibling]
@@ -206,15 +207,16 @@ def ifSiblingSeatTogether_ExceptRestricted(*args):
             age_dif = abs(age_i - age_j)
             older = max(age_i, age_j)
             if age_dif == 1:
-                if age_i > age_j: # When i older than j
-                    if pos_i%4 != 2:
-                    # TODO if age_i not in corridor, return False
-                        return False
-                if age_j > age_i:
-                    if pos_i%4 != 3: # When j older than i
-                    # TODO if age_j not in corridor, return False
-                        return False
-
+                if age_i > age_j:  # When i older than j
+                    # If i (older) not in 2+4k and then not in 3+4k, its in 1+4k or 0+4k, which arent seats near aisle
+                    if pos_i % 4 != 2:
+                        if pos_i % 4 != 3:
+                            return False
+                if age_j > age_i:  # When j older than i
+                    # If j (older) not in 2+4k and then not in 3+4k, its in 1+4k or 0+4k, which arent seats near aisle
+                    if pos_j % 4 != 2:
+                        if pos_j % 4 != 3:
+                            return False
     return True
 problem.addConstraint(ifSiblingSeatTogether_ExceptRestricted, arrayVariables)
 
@@ -227,14 +229,24 @@ if 3 in domainBlue:
 time_start = time.time()
 print(problem.getSolutions())
 
-solutions=problem.getSolutions()
-print("{")
-for index, solution in enumerate(solutions):
+solutions = problem.getSolutions()
+# print(problem.getSolutions()[1])
+
+'''for index, solution in enumerate(solutions):
+    # should be index in matrix_students[0], as matrix_students[index], else repeats the first students for all cases
     print("'"+str(matrix_students[0][0])+str(matrix_students[0][2])+str(matrix_students[0][3])+"':"+"{}".format(solution[matrix_students[i][0]]))
     #print("'"+str(matrix_students[int(index)][0])+str(matrix_students[int(index)][2])+str(matrix_students[int(index)][3])+"':"+"{}".format(solution[matrix_students[i][0]]))
     #print("{}".format(solution[matrix_students[i][0]]))
-print("}")
+print("}")'''
 
-print("#solutions:<"+str(len(problem.getSolutions()))+">")
+for index in range(len(solutions)):
+    string_solution = solutions[index]
+    for k, v in string_solution.items():
+        print('student=', k, ', value=', v)
+    print(string_solution)
+    #print("{}".format(solution[matrix_students[i][0]]))
+
+
+print("#solutions:<"+str(len(solutions))+">")
 time_end = time.time()
 print(time_end-time_start)
