@@ -184,9 +184,9 @@ def ifSiblingSeatTogether_ExceptRestricted(*args):
     for i in range(len(args)):
         # if the student has a sibling, neither is restricted and they're not sitting together then failed constraint
         # (remember x-1 is array position of student with id x)
-        sibling_of_i = matrix_students[i][1]
+        sibling_of_i = matrix_students[i][4]
         position_sibling = int(matrix_students[i][1])-1
-        if sibling_of_i != "0" and matrix_students[i][3] != "R" and matrix_students[position_sibling][3] != "R":
+        if sibling_of_i != "0" and matrix_students[i][3] != "R" and matrix_students[position_sibling][3] != "R": # If they are siblings and not reduced movility
             # To know if they are sitting together, we store their positions, compare the difference and their values.
             pos_i = args[i]
             pos_j = args[position_sibling]
