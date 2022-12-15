@@ -216,3 +216,12 @@ def get_cost_new_node(old_node, new_student):
     new_id = last_node_id + 1
 
 
+'''THE TEST ZONE - SCARY'''
+# Testing queue_validity with students02 - False, 2 restricted need someone to push
+# Testing queue_validity with students24 - True, restricted must go first
+my_queue = ['1', '2']
+print(queue_valid(my_queue))
+# Testing queue_validity with students02 - False, 2 restricted need someone to push
+# Testing queue_validity with students24 - False, restricted must go first
+my_queue2 = ['2', '1']
+print(queue_valid(my_queue2))
