@@ -96,9 +96,9 @@ def ifReducedmobilityThenAdjacentSeatIsFree(*args):
             valueReducedmobility = args[i]
             # print("current valueReducedmobility is "+str(valueReducedmobility))
             for j in range(i+1, len(args)):
-                if valueReducedmobility % 2 == 0 and args[j] == valueReducedmobility - 1:
+                if valueReducedmobility % 2 == 0 and args[j] == valueReducedmobility - 1: #When sit on left empty
                     return False
-                if valueReducedmobility % 2 == 1 and args[j] == valueReducedmobility + 1:
+                if valueReducedmobility % 2 == 1 and args[j] == valueReducedmobility + 1: #When sit on right empty
                     return False
     return True  # if no reduced mobility fails, there are no reduced mobility, or no variables, then constraint satisfied
 problem.addConstraint(ifReducedmobilityThenAdjacentSeatIsFree, arrayVariables)
@@ -109,7 +109,7 @@ def ifTroublesomeNoCR_ExceptSibling(*args):
         # If i is troublesome student, then find if anyone is adjacent troublesome/reduced mobility who aren't brothers
         if matrix_students[i][2] == "C":
             valueTrouble=args[i]
-            sibling_of_i=matrix_students[i][4]
+            sibling_of_i=matrix_students[i][4] # Take sibling id
             for j in range(i+1, len(args)):
                 # matrix_students[j][0] is the student id of j
                 # If j is the sibling of i, or they are not troublesome/reduced mobility, they can seat without distance
