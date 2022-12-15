@@ -109,7 +109,7 @@ def A_star_algorithm(state_of_n):
         lowest_cost_node = find_lowest_cost(open_list)
         open_list.remove(lowest_cost_node)
         closed_list.append(lowest_cost_node)
-        # If it is lowest cost and also is
+        # If it is lowest cost and also has no students left to enqueue [hcost = 0], then it is our goal node. Success!
         if lowest_cost_node.hcost == 0:
             success = True
         # Else, expand N = find successor nodes, create successor nodes if valid students, move them to open list
@@ -120,7 +120,7 @@ def A_star_algorithm(state_of_n):
             for node in list_new_nodes:
                 open_list.append(node)
             # Note that we don't reorder our open list by costs, we search for the lowest cost every time.
-            # We could make a sorting algorithm but run out of time.
+            # TODO: We could make a sorting algorithm but run out of time.
     if success:
         final_queue = lowest_cost_node.get_queue()
         if len(final_queue) == 0:
@@ -169,14 +169,17 @@ def queue_valid(queue):
     length_queue = len(queue)
     # If queue length is not bigger than zero (it is zero), then its initial case, we always expand it
     if length_queue > 0:
+        # If we have a full queue we check final student because R cant be final node (nobody helps push them)
         if length_queue == len(array_students):
             id_last_student = queue[length_queue - 1]
-            # TODO: R cant be final node
-            if id_last_student is not None and matrix_students[int(id_last_student)-1]:
+            if id_last_student is not None and matrix_students[int(id_last_student)-1][2] == "R":
                 return False
-        # TODO: if previous to us was R, we can't be R
-            if length_queue > 1:
-                id_2nd_last_student = queue[length_queue - 2]
+        # If previous to our student was R, we can't be R
+        if length_queue > 1:
+            id_last_student = queue[length_queue - 1]
+            id_2nd_last_student = queue[length_queue - 2]
+            if matrix_students[int(id_2nd_last_student)-1][2] == "R" and \
+                    matrix_students[int(id_last_student)-1][2] == "R":
                 return False
     return True
 
