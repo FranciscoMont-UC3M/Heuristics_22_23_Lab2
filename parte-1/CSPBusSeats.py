@@ -236,18 +236,14 @@ print("Number of solutions:<"+str(len(solutions))+">")
 
 '''for index in range(len(solutions)):
     string_solution = solutions[index]
+    print(matrix_students[(0)][2])
     for k, v in string_solution.items():
-        print('student=', k, ', value=', v)
-    print(string_solution)
-    #print("{}".format(solution[matrix_students[i][0]]))'''
-
-# OLD TRIES BELOW
-'''for index, solution in enumerate(solutions):
-    # should be index in matrix_students[0], as matrix_students[index], else repeats the first students for all cases
-    print("'"+str(matrix_students[0][0])+str(matrix_students[0][2])+str(matrix_students[0][3])+"':"+"{}".format(solution[matrix_students[i][0]]))
-    #print("'"+str(matrix_students[int(index)][0])+str(matrix_students[int(index)][2])+str(matrix_students[int(index)][3])+"':"+"{}".format(solution[matrix_students[i][0]]))
-    #print("{}".format(solution[matrix_students[i][0]]))
-print("}")'''
+        print("'"+k+str(matrix_students[k][2])+str(matrix_students[k][3])+"':"+str(v))'''
+        #print(k)
+        #k-=1
+        #print(k)
+        #print(matrix_students[(k-1)][2])
+        
 
 time_end = time.time()
 print(time_end-time_start)
