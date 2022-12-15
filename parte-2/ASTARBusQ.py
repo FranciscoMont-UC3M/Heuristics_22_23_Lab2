@@ -166,7 +166,6 @@ def find_lowest_cost_solution(array_nodes):
     return best_node
 
 
-#TODO
 '''Node expansion, new node's queue validity, and gcost calculation functions'''
 # We check that the possible new nodes are valid: R cant be final node, if previous was R we need non-R - WORKS
 def queue_valid(queue):
@@ -213,12 +212,44 @@ def expand_node(expanding_node):
     return list_new_nodes
 
 def gcost(queue):
-    death = 0
-    return death
+    cost_array = []
+    # Default value for elements in cost array is 1, we create cost array
+    for i in range(len(queue)):
+        cost_array.append(1)
+    # Depending on what type of student is sitting, and the ones before/after, costs get altered.
+    # See below:
+    for i in range(len(queue)):
+        student_of_matrix = matrix_students[int(queue[i])-1]
+        print(student)
+        # Reduced mobility students have cost 3, but person behind them costs zero.
+        if student_of_matrix[2] == "R":
+            cost_array[i] = 3
+            cost_array[i+1] = 0
+        # Conflictive students double cost of the students before and after, and
+        # they also double cost of any student after them in the queue who has a larger seat number
+        if student_of_matrix[1] == "C":
+            # Conflictive students double costs before and after them
+            cost_array[i-1] *= 2
+            cost_array[i+1] *= 2
+            # Find conflictive student's seat value in array_students_seats,
+            # because anyone after him in queue with higher number has double cost
+            conflictive_seat = int(array_students_seats[int(queue[i])-1][1])
+            # Check only queue students AFTER conflictive student, store their seat value
+            for j in range(i+1, len(queue)):
+                other_student_seat = int(array_students_seats[int(queue[j])-1][1])
+                # If student after conflictive in queue has larger seat number, twice the cost for them
+                if other_student_seat > conflictive_seat:
+                    cost_array[j] *= 2
+    # Computing final value of g(n) cost from initial to current node, so it can be stored in node attribute gcost
+    total_gcost = 0
+    for i in range(len(cost_array)):
+        total_gcost += cost_array[i]
+    return total_gcost
 
 '''Heuristics chosen and their functions'''
 # Depending on the heuristic chosen when running, it calculates h(n) with different functions
 def heuristic_from_inputs(heuristic, queue):
+    hcost = 0  # If no valid heuristic chosen
     if heuristic == "1":
         hcost = heuristic1(queue)
     elif heuristic == "2":
@@ -259,3 +290,7 @@ print(queue_valid(my_queue))
 # Testing queue_validity with students24 - False, restricted must go first
 my_queue2 = ['2', '1']
 print(queue_valid(my_queue2))
+
+a=4
+a*=2
+print(a)
