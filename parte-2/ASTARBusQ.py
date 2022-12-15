@@ -27,16 +27,19 @@ with open("ASTAR-tests/" + students_path + ".prob") as textFile:
 # We want to make the seats of each student more accessible.
 # Student with id = x has array position x-1 in both cases
 array_students = []
+array_students_seats = []
 matrix_students = []
 # Add each student to the array/matrix corresponding
 for student, seat in students_content.items():
+    array_students.append(student[0])
     # First item is student_id, second its their assigned seat
     array_student_seat = [student[0], seat]
-    array_students.append(array_student_seat)
+    array_students_seats.append(array_student_seat)
     # store characteristics of student into array: student_id, student_conflictive, student_restricted
     array_characteristics = [student[0], student[1], student[2]]
     matrix_students.append(array_characteristics)
 print(array_students)
+print(array_students_seats)
 print(matrix_students)
 
 # Count number of reduced mobility and troublesome students
@@ -58,16 +61,16 @@ last_node_id = 0
 
 
 class Node:
-    def __init__(self, node_id, prev, depth, queue, gcost, hcost, student_id):
+    def __init__(self, node_id, prev, depth, queue, remaining, gcost, hcost, student_id):
         self.id = node_id
-        self.prev = prev
-        self.depth = depth  # len(queue), will be depth of previous node + 1
+        self.prev = prev  # The id for the previous node, to build a path if necessary
+        self.depth = depth  # alternatively just len(queue), will be depth of previous node + 1
         self.queue = queue  # an array storing the assigned students for this node, the queue state for this node
+        self.remaining = remaining  # an array storing the not yet visited students
         self.gcost = gcost  # cost from initial node to current node, calculated on creation of node
         self.hcost = hcost  # cost estimation from current node to end, DEPENDS ON HEURISTIC
-                            # 1+len(array_students)-depth
-        self.fcost = gcost+hcost
-        self.student_id = student_id  # an array storing the cost for this node, inputted on node creation
+        self.fcost = gcost+hcost  # total cost estimation (real previous cost + cost estimation)
+        self.student_id = student_id  # the id of the student AS A STRING, LIKE IN ALL ARRAYS
 
     def get_id(self):
         return self.id
@@ -80,6 +83,9 @@ class Node:
 
     def get_queue(self):
         return self.queue
+
+    def get_remaining(self):
+        return self.remaining
 
     def get_gcost(self):
         return self.gcost
@@ -97,14 +103,18 @@ class Node:
 #Best First Search - A*, but we don't know the final state
 def A_star_algorithm(state_of_n):
     empty_queue = []
-    # Initial node with attributes (node_id, prev_node_id, depth, queue, gcost, hcost, student_id)
-    initial_node = Node(last_node_id, None, 0, empty_queue, 0, heuristic_from_inputs(heuristic, empty_queue), None)
+    # Initial node attributes (node_id, prev_node_id, depth,
+    #                           queue, remaining,
+    #                           gcost, hcost, student_id)
+    initial_node = Node(last_node_id, None, 0,
+                        empty_queue, array_students,
+                        0, heuristic_from_inputs(heuristic, empty_queue), None)
     open_list = [initial_node]  # Array of node_id/state, priority queue?
     closed_list = []  #
     success = False
     lowest_cost_node = initial_node
 
-    while len(open_list)!=0 and success == False:
+    while len(open_list) != 0 and success is False:
         # We find the lowest cost node, called N in the slides, and move it out of open_list and into closed_list
         lowest_cost_node = find_lowest_cost(open_list)
         open_list.remove(lowest_cost_node)
@@ -120,7 +130,7 @@ def A_star_algorithm(state_of_n):
             for node in list_new_nodes:
                 open_list.append(node)
             # Note that we don't reorder our open list by costs, we search for the lowest cost every time.
-            # TODO: We could make a sorting algorithm but run out of time.
+            # TODO: We could have made a sorting algorithm but run out of time.
     if success:
         final_queue = lowest_cost_node.get_queue()
         if len(final_queue) == 0:
@@ -158,14 +168,8 @@ def find_lowest_cost_solution(array_nodes):
 
 #TODO
 '''Node expansion, new node's queue validity, and gcost calculation functions'''
-def expand_node(expanding_node):
-    list_new_nodes = []
-    # create new possible queues
-    # If the queue for the node is valid, we create the node per se and append to the list
-    return list_new_nodes
-
-# We check that the possible new nodes are valid: R cant be final node, if previous was R we need non-R
-def queue_valid(queue):    
+# We check that the possible new nodes are valid: R cant be final node, if previous was R we need non-R - WORKS
+def queue_valid(queue):
     length_queue = len(queue)
     # If queue length is not bigger than zero (it is zero), then its initial case, we always expand it
     if length_queue > 0:
@@ -183,6 +187,35 @@ def queue_valid(queue):
                 return False
     return True
 
+# We create all possible new queues with remaining students. If they are valid, create node and add it to list
+def expand_node(expanding_node):
+    list_new_nodes = []
+    current_queue = expanding_node.get_queue()
+    # Creation of all possible new queues with remaining students. If they are valid, create node and add it to list
+    for student_id in expanding_node.remaining:
+        # the new queue is just the old queue without the student id we will be adding
+        new_queue = current_queue.append(student_id)
+        # If the new_queue is valid, create node and add it to list
+        if queue_valid(new_queue) is True:
+            new_id = last_node_id + 1  # Constantly increasing the node_id we will use
+            prev_id = expanding_node.get_id()
+            new_depth = expanding_node.get_depth() + 1
+            # The remaining students are previous ones minus our new student
+            new_remaining = expanding_node.get_remaining().remove(student_id)
+            # Using the gcost function that calculates all previous cost and our own cost
+            new_gcost = gcost(new_queue)
+            # Using heuristic determined by inputs to estimate the cost until reaching a solution
+            new_hcost = heuristic_from_inputs(heuristic, new_queue)
+            # Create node with all new parameters for our new student id
+            new_node = Node(new_id, prev_id, new_depth, new_queue, new_remaining, new_gcost, new_hcost, student_id)
+            list_new_nodes.append(new_node)
+    # If the queue for the node is valid, we create the node per se and append to the list
+    return list_new_nodes
+
+def gcost(queue):
+    death = 0
+    return death
+
 '''Heuristics chosen and their functions'''
 # Depending on the heuristic chosen when running, it calculates h(n) with different functions
 def heuristic_from_inputs(heuristic, queue):
@@ -190,6 +223,7 @@ def heuristic_from_inputs(heuristic, queue):
         hcost = heuristic1(queue)
     elif heuristic == "2":
         hcost = heuristic2(queue)
+    return hcost
 
 # Heuristic 1 is very basic: it adds one (minimum avg cost) for every student that remains to be inserted in the queue
 def heuristic1(queue):
@@ -197,7 +231,7 @@ def heuristic1(queue):
     print("hcost = "+str(hcost)+", for queue: "+str(queue))
     return hcost
 
-# Heuristic 2 is a better aproximation that heuristic 1 for the minimum remaining cost:
+# Heuristic 2 is a better aproximation than heuristic 1 for the minimum remaining cost:
 # cost = 3 * number_reduced + 1 * (total - 2 * number_reduced)
 # because reduced students cost 3 and non-reduced who aren't pushing a reduced (n-r-r) cost 1
 def heuristic2(queue):
