@@ -10,6 +10,12 @@ python CSPBusSeats.py students21
 python CSPBusSeats.py students22
 # test with two brothers (one troublesome) on front,back (=on front) -
 # 8 solutions (constraints work)
+python CSPBusSeats.py students23
+# test with two brothers (one troublesome) on front (same year) -
+# 16 solutions (constraints work)
+python CSPBusSeats.py students24
+# test for ASTAR with one restricted and one non-restricted on back -
+# 56 (4x14) solutions (constraints work)
 python CSPBusSeats.py students03
 # test should fail - three restricted & troublesome in the back where only 2 fit in 4 seats -
 # 0 solutions (constraints work)
@@ -23,4 +29,6 @@ python CSPBusSeats.py students41
 python CSPBusSeats.py students06
 # test should fail - six restricted and troublesome students (only space for four)
 # 0 solutions (constraints work)
-python CSPBusSeats.py students08 # test with eight students, copied from the statement
+python CSPBusSeats.py students08
+# test with eight students, copied from the statement
+#

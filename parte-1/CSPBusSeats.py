@@ -179,7 +179,7 @@ def seatAccordingToYear_ExceptSibling(*args):
     return True
 problem.addConstraint(seatAccordingToYear_ExceptSibling, arrayVariables)
 
-'''Constraint for siblings, valid only if they sit together with the older one outside - TEST'''
+'''Constraint for siblings, valid only if they sit together with the older one outside - WORKS'''
 def ifSiblingSeatTogether_ExceptRestricted(*args):
     for i in range(len(args)):
         # if the student has a sibling, neither is restricted and they're not sitting together then failed constraint
@@ -218,6 +218,12 @@ def ifSiblingSeatTogether_ExceptRestricted(*args):
                     if pos_j % 4 != 2 and pos_j % 4 != 3:
                         if pos_i % 4 == 2 or pos_i % 4 == 3:
                             return False
+            # if age difference is not 1 (they have the same age), we must check they are on the same side of aisle
+            else:
+                if pos_i % 4 == 2 and pos_j % 4 == 3:
+                    return False
+                if pos_i % 4 == 3 and pos_j % 4 == 2:
+                    return False
     return True
 problem.addConstraint(ifSiblingSeatTogether_ExceptRestricted, arrayVariables)
 
@@ -235,6 +241,7 @@ print("Number of solutions:<"+str(len(solutions))+">")
     print(string_solution)
     #print("{}".format(solution[matrix_students[i][0]]))'''
 
+# OLD TRIES BELOW
 '''for index, solution in enumerate(solutions):
     # should be index in matrix_students[0], as matrix_students[index], else repeats the first students for all cases
     print("'"+str(matrix_students[0][0])+str(matrix_students[0][2])+str(matrix_students[0][3])+"':"+"{}".format(solution[matrix_students[i][0]]))
