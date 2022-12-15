@@ -38,7 +38,7 @@ for student, seat in students_content.items():
     # store characteristics of student into array: student_id, student_conflictive, student_restricted
     array_characteristics = [student[0], student[1], student[2]]
     matrix_students.append(array_characteristics)
-print(array_students)
+# print(array_students)
 print(array_students_seats)
 print(matrix_students)
 
@@ -100,8 +100,8 @@ class Node:
         return self.student_id
 
 
-#Best First Search - A*, but we don't know the final state
-def A_star_algorithm(state_of_n):
+'''Best First Search - A*, but we don't know the final state'''
+def A_star_algorithm():
     empty_queue = []
     # Initial node attributes (node_id, prev_node_id, depth,
     #                           queue, remaining,
@@ -169,6 +169,8 @@ def find_lowest_cost_solution(array_nodes):
 '''Node expansion, new node's queue validity, and gcost calculation functions'''
 # We check that the possible new nodes are valid: R cant be final node, if previous was R we need non-R - WORKS
 def queue_valid(queue):
+    if queue is None:
+        return True
     length_queue = len(queue)
     # If queue length is not bigger than zero (it is zero), then its initial case, we always expand it
     if length_queue > 0:
@@ -191,16 +193,25 @@ def expand_node(expanding_node):
     list_new_nodes = []
     current_queue = expanding_node.get_queue()
     # Creation of all possible new queues with remaining students. If they are valid, create node and add it to list
-    for student_id in expanding_node.remaining:
+    # print("remaining = "+str(expanding_node.get_remaining()))
+    remaining_students = expanding_node.get_remaining()
+    for i in range(len(remaining_students)):
+        student_id = remaining_students[i]
         # the new queue is just the old queue without the student id we will be adding
-        new_queue = current_queue.append(student_id)
+        new_queue = []
+        if current_queue is None:
+            new_queue.append(student_id)
+        else:
+            new_queue = current_queue[:]
+            new_queue.append(student_id)
         # If the new_queue is valid, create node and add it to list
         if queue_valid(new_queue) is True:
             new_id = last_node_id + 1  # Constantly increasing the node_id we will use
             prev_id = expanding_node.get_id()
             new_depth = expanding_node.get_depth() + 1
             # The remaining students are previous ones minus our new student
-            new_remaining = expanding_node.get_remaining().remove(student_id)
+            new_remaining = remaining_students[:]
+            new_remaining.remove(student_id)
             # Using the gcost function that calculates all previous cost and our own cost
             new_gcost = gcost(new_queue)
             # Using heuristic determined by inputs to estimate the cost until reaching a solution
@@ -212,6 +223,8 @@ def expand_node(expanding_node):
     return list_new_nodes
 
 def gcost(queue):
+    if queue is None:
+        return 0
     cost_array = []
     # Default value for elements in cost array is 1, we create cost array
     for i in range(len(queue)):
@@ -248,7 +261,7 @@ def gcost(queue):
     # Computing final value of g(n) cost from initial to current node, so it can be stored in node attribute gcost
     total_gcost = 0
     for i in range(len(cost_array)):
-        print(str(i)+" costs "+str(cost_array[i]))
+        # print(str(i)+" costs "+str(cost_array[i]))
         total_gcost += cost_array[i]
     return total_gcost
 
@@ -265,16 +278,27 @@ def heuristic_from_inputs(heuristic, queue):
 
 # Heuristic 1 is very basic: it adds one (minimum avg cost) for every student that remains to be inserted in the queue
 def heuristic1(queue):
-    hcost = len(array_students) - len(queue)
-    print("hcost = "+str(hcost)+", for queue: "+str(queue))
+    # For initial case
+    if queue is None:
+        length_queue = 0
+    else:
+        length_queue = len(queue)
+    hcost = len(array_students) - length_queue
+    # print("hcost = "+str(hcost)+", for queue: "+str(queue))
     return hcost
 
 # Heuristic 2 is a better aproximation than heuristic 1 for the minimum remaining cost:
 # cost = 3 * number_reduced + 1 * (total - 2 * number_reduced)
 # because reduced students cost 3 and non-reduced who aren't pushing a reduced (n-r-r) cost 1
 def heuristic2(queue):
+    # For initial case
+    if queue is None:
+        length_queue = 0
+    else:
+        length_queue = len(queue)
+
     reduced_in_queue = 0
-    for i in range(len(queue)):
+    for i in range(length_queue):
         # We find in the matrix the student whose queue id is string i (so, the one in position int(i)-1),
         # and if they are reduced mobility we add one to the total of reduced in queue
         if matrix_students[int(queue[i])-1][2] == "R":
@@ -283,13 +307,15 @@ def heuristic2(queue):
     min_cost = 3 * (remaining_reduced) + 1 * (total_students - 2 * remaining_reduced)
     return min_cost
 
-'''TODO'''
-def get_cost_new_node(old_node, new_student):
-    new_id = last_node_id + 1
+
+'''OUTPUT AREA'''
+print("best solution is: "+str(A_star_algorithm()))
+
+
 
 
 '''THE TEST ZONE - SCARY'''
-# Testing queue_validity with students02 - False, 2 restricted need someone to push
+'''# Testing queue_validity with students02 - False, 2 restricted need someone to push
 # Testing queue_validity with students24 - True, restricted must go first
 my_queue = ['1', '2']
 print(str(my_queue)+" order validity is "+str(queue_valid(my_queue)))
@@ -303,4 +329,13 @@ print(str(my_queue2)+" order validity is "+str(queue_valid(my_queue2)))
 cost1 = gcost(my_queue)
 print("gcost with "+str(my_queue)+" is "+str(cost1))
 cost2 = gcost(my_queue2)
-print("gcost with "+str(my_queue2)+" is "+str(cost2))
+print("gcost with "+str(my_queue2)+" is "+str(cost2))'''
+
+'''my_queue3 = ['1', '2', '3']  # ideal case for students31, cost = 4, CORRECT
+cost3 = gcost(my_queue3)
+print("gcost with "+str(my_queue3)+" is "+str(cost3))
+my_queue4 = ['1', '3', '2']  # worst case for students31, cost = 8, CORRECT
+cost4 = gcost(my_queue4)
+print("gcost with "+str(my_queue4)+" is "+str(cost4))'''
+
+
