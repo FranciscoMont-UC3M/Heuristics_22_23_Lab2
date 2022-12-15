@@ -44,7 +44,7 @@ matrix_students = []
 for i in range(len(array_students)):
     temp_student_array = array_students[i].split(",")
     matrix_students.append(temp_student_array)
-print(matrix_students)
+print("matrix_students: "+str(matrix_students))
 # print(matrix_students[0][0])
 
 problem = Problem()
@@ -159,8 +159,8 @@ for i in range(len(arrayVariables)):
             arrayBackBus.append(arrayVariables[i])
     # If they had to be on a seat on the FRONT of the bus (bus seat number under 17) and some seat is over 16, return False
     # If they had to be on a seat on the BACK of the bus (bus seat number over 16) and some seat is under 17, return False
-print("front of the bus: " + str(arrayFrontBus))
-print("back of the bus: " + str(arrayBackBus))
+print("Students sitting in the front of the bus: " + str(arrayFrontBus))
+print("Students sitting in the back of the bus: " + str(arrayBackBus))
 
 '''Constraint for siblings, valid only if they sit in same section - WORKS'''
 def seatAccordingToYear_ExceptSibling(*args):
@@ -228,22 +228,36 @@ def ifSiblingSeatTogether_ExceptRestricted(*args):
 problem.addConstraint(ifSiblingSeatTogether_ExceptRestricted, arrayVariables)
 
 time_start = time.time()
-print(problem.getSolutions())
+# print(problem.getSolutions())
 
 solutions = problem.getSolutions()
 # print(problem.getSolutions()[1])
-print("Number of solutions:<"+str(len(solutions))+">")
 
-'''for index in range(len(solutions)):
+'''OUTPUT FILE'''
+# We first find the number of solutions and make the string we will include at the start of the file
+number_solutions = "Number of solutions:<"+str(len(solutions))+">"
+solutions_final = str(number_solutions)+"\n"
+
+# Then, we traverse the list of solutions and the student items within them, and create a string line for every solution
+for index in range(len(solutions)):
     string_solution = solutions[index]
-    print(matrix_students[(0)][2])
+    string_final = "{"
     for k, v in string_solution.items():
-        print("'"+k+str(matrix_students[k][2])+str(matrix_students[k][3])+"':"+str(v))'''
-        #print(k)
-        #k-=1
-        #print(k)
-        #print(matrix_students[(k-1)][2])
-        
+        student = k+str(matrix_students[int(k)-1][2])+str(matrix_students[int(k)-1][3])
+        seat = v
+        student_string = "'"+student+"': "+str(seat)+", "
+        string_final += student_string
+    # Before ending line remove the last comma and space (of the last student item) so it fits the output guidelines
+    string_final = string_final[:-2]
+    string_final += "}\n"
+    solutions_final += string_final
+
+# Then we print the solutions that we will write into the output file
+print(solutions_final)
+
+# We write our string with the solutions in an output file
+with open("CSP-tests/" + students_path + ".output", 'a') as outputFile:
+    outputFile.write(solutions_final)
 
 time_end = time.time()
-print(time_end-time_start)
+print("Time from search of solutions to writing output, both included (seconds): "+str(time_end-time_start))
