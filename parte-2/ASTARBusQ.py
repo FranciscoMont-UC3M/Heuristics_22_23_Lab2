@@ -220,17 +220,22 @@ def gcost(queue):
     # See below:
     for i in range(len(queue)):
         student_of_matrix = matrix_students[int(queue[i])-1]
-        print(student)
         # Reduced mobility students have cost 3, but person behind them costs zero.
         if student_of_matrix[2] == "R":
             cost_array[i] = 3
-            cost_array[i+1] = 0
+            # i+1 should exist to push R due to queue_validity, but for tests purposes, this check is left here
+            if i + 1 < len(cost_array):
+                cost_array[i+1] = 0
         # Conflictive students double cost of the students before and after, and
         # they also double cost of any student after them in the queue who has a larger seat number
         if student_of_matrix[1] == "C":
             # Conflictive students double costs before and after them
-            cost_array[i-1] *= 2
-            cost_array[i+1] *= 2
+            # if i-1 is lower than zero, we would change last element of the list.
+            if i-1 >= 0:
+                cost_array[i-1] *= 2
+            # if i+1 is not smaller than array length, we would go out of array size and get an error.
+            if i+1 < len(cost_array):
+                cost_array[i+1] *= 2
             # Find conflictive student's seat value in array_students_seats,
             # because anyone after him in queue with higher number has double cost
             conflictive_seat = int(array_students_seats[int(queue[i])-1][1])
@@ -243,8 +248,10 @@ def gcost(queue):
     # Computing final value of g(n) cost from initial to current node, so it can be stored in node attribute gcost
     total_gcost = 0
     for i in range(len(cost_array)):
+        print(str(i)+" costs "+str(cost_array[i]))
         total_gcost += cost_array[i]
     return total_gcost
+
 
 '''Heuristics chosen and their functions'''
 # Depending on the heuristic chosen when running, it calculates h(n) with different functions
@@ -285,12 +292,15 @@ def get_cost_new_node(old_node, new_student):
 # Testing queue_validity with students02 - False, 2 restricted need someone to push
 # Testing queue_validity with students24 - True, restricted must go first
 my_queue = ['1', '2']
-print(queue_valid(my_queue))
+print(str(my_queue)+" order validity is "+str(queue_valid(my_queue)))
 # Testing queue_validity with students02 - False, 2 restricted need someone to push
 # Testing queue_validity with students24 - False, restricted must go first
 my_queue2 = ['2', '1']
-print(queue_valid(my_queue2))
+print(str(my_queue2)+" order validity is "+str(queue_valid(my_queue2)))
 
-a=4
-a*=2
-print(a)
+# Testing gcost with students24 - cost = 3, correct
+# Testing gcost with students23 - cost = 3, no
+cost1 = gcost(my_queue)
+print("gcost with "+str(my_queue)+" is "+str(cost1))
+cost2 = gcost(my_queue2)
+print("gcost with "+str(my_queue2)+" is "+str(cost2))

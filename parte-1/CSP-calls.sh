@@ -14,11 +14,14 @@ python CSPBusSeats.py students23
 # test with two brothers (one troublesome) on front (same year) -
 # 16 solutions (constraints work)
 python CSPBusSeats.py students24
-# test for ASTAR with one restricted and one non-restricted on back -
+# test for ASTAR with two students (one restricted and one non-restricted) on back -
 # 56 (4x14) solutions (constraints work)
 python CSPBusSeats.py students03
 # test should fail - three restricted & troublesome in the back where only 2 fit in 4 seats -
 # 0 solutions (constraints work)
+python CSPBusSeats.py students03
+# test for ASTAR with three students (one restricted, one normal, and one conflictive) in the back -
+# 728 solutions
 python CSPBusSeats.py students04
 # test with four restricted and troublesome students (2 first year, 2 second year) -
 # 36 (6x6) solutions (constraints work)
